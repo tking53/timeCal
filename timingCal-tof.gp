@@ -1,6 +1,7 @@
 reset
 set xrange[180:250]
 set fit errorvariables
+set terminal dumb
 
 #file="his/cu77-b/testcut79.dat"
 file="test.dat"
