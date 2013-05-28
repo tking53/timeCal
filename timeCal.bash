@@ -40,9 +40,9 @@ echo -e "#Num MaxPos Mu" > results-diff.dat
 for i in `seq 0 $numDiff`
 do
     #readhis $hisPath --id $diffId --gy $i,$i > test.dat
-    #hasData=`awk '{if(NR>4 && $2!=0){print 1; exit(1)} }' test.dat`
+    #hasDiffData=`awk '{if(NR>4 && $2!=0){print 1; exit(1)} }' test.dat`
     #gnuplot timingCal.gp 2>&1>/dev/null && j=`cat test.par`
-    #if (( hasData == 0 ))
+    #if (( hasDiffData == 0 ))
     #then
         echo $i 0.0 >> results-diff.dat
     #else
@@ -97,4 +97,4 @@ done < results-diff.tmp
 echo "Finished constructing the timingCal.txt."
 
 echo "Removing the temporary files"
-rm -f results-diff.tmp results-tof.tmp
+rm -f results-diff.tmp results-tof.tmp fit.log
