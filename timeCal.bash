@@ -3,15 +3,17 @@
 #For test00-orig.his we look at the standard 3103
 #Either one will use 3102 for the time differences
 
-#numBars=$1
-numBars=48
+numBars=$1
+hisPath="his/078cu/078cu-timeCal.his"
+tofId=3103
+diffId=3102
+#numBars=48
+
 let dubBars=$numBars*2
 let numDiff=$numBars-1
 let numTof=$dubBars-1
 let tofLines=$dubBars+1
 let diffLines=$numBars+1
-
-echo $numBars $dubBars
 
 errorMsg() {
     echo -e "We have some kind of problems fitting the " $1 "."
@@ -23,14 +25,13 @@ successMsg() {
     echo -e "There were " $2 " fits (plus one header line)"
 }
 
-
 #--------- DOING THE TOF PART ----------------
 rm -f results-tof.dat test.par test.dat
-touch results-tof.dat && echo -e "#Num MaxPos Mean" >> results-tof.dat
+touch results-tof.dat && echo -e "#Num MaxPos Mu" >> results-tof.dat
 for i in `seq 0 $numTof`
 do
-    readhis his/cu77-b/test00-cut.his --id 3200 --gy $i,$i > test.dat
-    gnuplot timingCal-tof.gp 2>&1>/dev/null && j=`cat test.par`
+    readhis $hisPath --id $tofId --gy $i,$i > test.dat
+    gnuplot timingCal.gp 2>&1>/dev/null && j=`cat test.par`
     echo $i $j >> results-tof.dat
 done
 
@@ -39,8 +40,8 @@ rm -f test.par test.dat results-diff.dat
 touch results-diff.dat && echo -e "#Num MaxPos Mu" >> results-diff.dat
 for i in `seq 0 $numDiff`
 do
-    readhis his/cu77-b/test00-cut.his --id 3102 --gy $i,$i > test.dat
-    gnuplot timingCal-diff.gp 2>&1>/dev/null && j=`cat test.par`
+    readhis $hisPath --id $diffId --gy $i,$i > test.dat
+    gnuplot timingCal.gp 2>&1>/dev/null && j=`cat test.par`
     echo $i $j >> results-diff.dat
 done
 
@@ -63,17 +64,17 @@ else
 fi
 
 #---------------- CALCULATE THE NEW LINES FOR THE CORRECTION -------------
-awk '{if (NR > 1) print int($NF*0.5), (203.366-$4)*0.5}' results-tof.dat > results-tof.tmp
-awk '{if (NR > 1) print $NF, (200.0-$4)*0.5}' results-diff.dat > results-diff.tmp
+awk '{if (NR > 1) print int($1*0.5), (203.366-$3)*0.5}' results-tof.dat > results-tof.tmp
+awk '{if (NR > 1) print $1, (200.0-$3)*0.5}' results-diff.dat > results-diff.tmp
 
 #----------- UPDATE THE TIMING CAL FILE -------------------
 while read LINE
 do
     barNum=`echo $LINE | awk '{print $1}'`
-    cal0=`echo $LINE | awk '{print $3}'`
+    cal0=`echo $LINE | awk '{print $2}'`
     read LINE
-    cal1=`echo $LINE | awk '{print $3}'`
-    
+    cal1=`echo $LINE | awk '{print $2}'`
+
     newLine=`awk -v bar=$barNum -v tofCal0=$cal0 -v tofCal1=$cal1 '{if($1==bar && $2 =="small")print $1,$2,$3,$4,$5,$6, tofCal0, tofCal1}' timingCal.txt`
     awk -v bar=$barNum -v line="$newLine" '{if($1==bar && $2 =="small") sub($0,line); print}' timingCal.txt > vandleCal.tmp
     mv vandleCal.tmp timingCal.txt
@@ -81,8 +82,9 @@ done < results-tof.tmp
 
 while read LINE
 do
-    barNum=`echo $LINE | awk '{print $1}'`
-    cal=`echo $LINE | awk '{print $3}'`
+    set -- $LINE
+    barNum=$1
+    cal=$2
     
     newLine=`awk -v bar=$barNum -v diffCal0=$cal '{if($1==bar && $2 =="small")print $1,$2,$3,$4,$5,diffCal0,$7,$8}' timingCal.txt`
     awk -v bar=$barNum -v line="$newLine" '{if($1==bar && $2 =="small") sub($0,line); print}' timingCal.txt > vandleCal.tmp
