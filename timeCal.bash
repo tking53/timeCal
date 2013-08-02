@@ -1,8 +1,20 @@
 #!/bin/bash
-#For test00-cut.his we need to look at 3200 as it contains the QDC
-#For test00-orig.his we look at the standard 3103
-#Either one will use 3102 for the time differences
-
+#-----------------------------------------------------------------
+# -- \file timeCal.bash
+# -- Description: This is a bash script that will extract the 
+# --    ToF and Tdiff spectra from an uncalibrated VANDLE 
+# --    histogram using readhis. It will give as final output the 
+# --    fully functional timingCal.txt to be used with the 
+# --    pixie_ldf_c software. It expects as input the number of 
+# --    VANDLE bars you have in the analysis.
+# --    
+# -- \author S. V. Paulauskas
+# -- \date 05 December 2012
+# --
+# -- This script is distributed as part of a suite to perform
+# -- calibrations for VANDLE. It is distributed under the
+# -- GPL V 3.0 license. 
+# ---------------------------------------------------------------
 numBars=$1
 hisPath="his/078cu/078cu-timeCal.his"
 tofId=3103
@@ -93,4 +105,4 @@ done < results-diff.tmp
 echo "Finished constructing the timingCal.txt."
 
 echo "Removing the temporary files"
-rm -f results-diff.tmp results-tof.tmp
+rm -f results-diff.tmp results-tof.tmp test.dat test.par
