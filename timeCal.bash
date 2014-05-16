@@ -1,5 +1,5 @@
 #!/bin/bash
-hisPath="hist/hasTarget.his"
+hisPath="/home/pixie16/svp/students/pixie_scan/run4024-newTest.his"
 tofId=3133
 diffId=3132
 numBars=36
