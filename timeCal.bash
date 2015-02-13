@@ -128,7 +128,6 @@ CalculateAndOutput(){
             row=`echo "$j*$numStarts+$i" | bc`
             fitType="tof"
             PerformFit
-            echo $fitRes
             if [ "$fitRes" != 0 ]
             then
                 fitRes=`echo "scale=5;($gammaTofBins-$fitRes)/$histResolution" |bc -l`
