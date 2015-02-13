@@ -74,18 +74,21 @@ SetParams(){
         dist=$smallDist
         offset=$smallOffset
         maxBarCount=$numSmallCount
+        numBars=$numSmallBars
     elif [ "$type" = medium ]
     then
         type=medium
         dist=$mediumDist
         offset=$mediumOffset
         maxBarCount=$numMediumCount
+        numBars=$numMediumBars
     elif [ "$type" = big ]
     then
         type=big
         dist=$bigDist
         offset=$bigOffset
         maxBarCount=$numBigCount
+        numBars=$NumBigBars
     else
         echo "ERROR: We have gotten an unknown bar type ($type)!! "\
              "This should never happen! Now barfing...."
@@ -127,28 +130,28 @@ CalculateAndOutput(){
 }
 
 OutputInfo() {
-    echo "We are calculating the parameters for $numSmallBars $type Bars."
+    echo "We are calculating the parameters for $numBars $type Bars."
 }
 
 if [ "$numSmallBars" != 0 ]
 then
     SetParams "small"
     OutputInfo
-    CalculateAndOutput > smallConfig.xml
+    CalculateAndOutput > $resultDir/smallConfig.xml
 fi
 
 if [ "$numBigBars" != 0 ]
 then
     SetParams "big"
     OutputInfo
-    CalculateAndOutput > bigConfig.xml
+    CalculateAndOutput > $resultDir/bigConfig.xml
 fi
 
 if [ "$numMediumBars" != 0 ]
 then
     SetParams "medium"
     OutputInfo
-    CalculateAndOutput > mediumConfig.xml
+    CalculateAndOutput > $resultDir/mediumConfig.xml
 fi
 exit
 

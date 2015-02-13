@@ -23,10 +23,12 @@
 #---------- Path and Histogram Information ----------
 #Sets the histogram to be used for the time calibration
 his="his/vandleBeta-12-4-14/tcal.his"
+#Sets the path for the results
+resultDir="results"
 
 #---------- Fitting Configuration ---------
 #Sets the minimum statistics required for fitting the spectra
-minStats=1000
+minStats=5000
 
 #---------- Start Information -----------
 #The number of start detectors that are in the analysis
