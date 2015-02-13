@@ -25,10 +25,12 @@
 his="his/vandleBeta-12-4-14/tcal.his"
 #Sets the path for the results
 resultDir="results"
+#Sets the path for the physical offsets of the bars
+physOffsetDir="physOffsets/anl2015"
 
 #---------- Fitting Configuration ---------
 #Sets the minimum statistics required for fitting the spectra
-minStats=5000
+minStats=100
 
 #---------- Start Information -----------
 #The number of start detectors that are in the analysis
@@ -39,18 +41,24 @@ numStarts=4
 numSmallBars=12
 #Average distance of the small VANDLE bars from the source 
 smallDist=50.5
+#The file containing the small offsets 
+smallOffsets="small.dat"
 
 #---------- Medium Bar Information ----------
 #The number of medium VANDLE bars that are in the analysis
 numMediumBars=28
 #Average distance of the medium VANDLE bars from the source 
 mediumDist=100.0
+#The file containing the small offsets 
+mediumOffsets="medium.dat"
 
 #---------- Big Bar Information ----------
 #The number of big VANDLE bars that are in the analysis
-numBigBars=0
+#numBigBars=0
 #Average distance of the medium VANDLE bars from the source 
 bigDist=300.0
+#The file containing the small offsets 
+bigOffsets="big.dat"
 
 #---------- Histogram Information ----------
 #Offset for VANDLE histograms

@@ -25,6 +25,8 @@ let numBigCount=$numBigBars-1
 
 tempHistData="/tmp/tcal.dat"
 tempFitResults="/tmp/tcal.par"
+errorLog="errors.log"
+rm $errorLog > /dev/null 2>&1
 skippedCount=0
 
 SumSpectraCounts() {
@@ -75,6 +77,7 @@ SetParams(){
         offset=$smallOffset
         maxBarCount=$numSmallCount
         numBars=$numSmallBars
+        physOffsets=$physOffsetDir/$smallOffsets
     elif [ "$type" = medium ]
     then
         type=medium
@@ -82,6 +85,7 @@ SetParams(){
         offset=$mediumOffset
         maxBarCount=$numMediumCount
         numBars=$numMediumBars
+        physOffsets=$physOffsetDir/$mediumOffsets
     elif [ "$type" = big ]
     then
         type=big
@@ -89,6 +93,7 @@ SetParams(){
         offset=$bigOffset
         maxBarCount=$numBigCount
         numBars=$NumBigBars
+        physOffsets=$physOffsetDir/$bigOffsets
     else
         echo "ERROR: We have gotten an unknown bar type ($type)!! "\
              "This should never happen! Now barfing...."
@@ -108,8 +113,13 @@ CalculateAndOutput(){
         if [ "$fitRes" != 0 ]
         then
             fitRes=`echo "scale=5;($histOffset-$fitRes)/$histResolution" | bc -l`
+        else
+            echo "Warning: Not enough stats for TDiff fit in $type bar $j "\
+                 >> $errorLog
         fi
-        echo -e "    <Bar number=\"$j\" lroffset=\"$fitRes\">"
+
+        physInfo=`awk -v barnum=$j '{if($1==barnum) print "z0=\""$2"\" xoffset=\""$3"\" zoffset=\""$4"\""}' $physOffsets`
+        echo -e "    <Bar number=\"$j\" lroffset=\"$fitRes\" $physInfo>"
         
         let histId=vandleOffset+vandleTofBaseId+$offset
         for i in `seq 0 $maxStartCount` 
@@ -118,9 +128,13 @@ CalculateAndOutput(){
             row=`echo "$j*$numStarts+$i" | bc`
             fitType="tof"
             PerformFit
+            echo $fitRes
             if [ "$fitRes" != 0 ]
             then
                 fitRes=`echo "scale=5;($gammaTofBins-$fitRes)/$histResolution" |bc -l`
+            else
+                echo "Warning: Not enough stats for ToF fit in $type bar $j "\
+                     "and start $i" >> $errorLog
             fi
             echo -e "        <TofOffset location=\"$i\" offset=\"$fitRes\"/>"
         done
@@ -133,26 +147,30 @@ OutputInfo() {
     echo "We are calculating the parameters for $numBars $type Bars."
 }
 
-if [ "$numSmallBars" != 0 ]
+if [[ ! -z $numSmallBars &&  "$numSmallBars" != 0 ]]
 then
     SetParams "small"
     OutputInfo
     CalculateAndOutput > $resultDir/smallConfig.xml
 fi
 
-if [ "$numBigBars" != 0 ]
+if [[ ! -z $numBigBars && "$numBigBars" != 0 ]]
 then
     SetParams "big"
     OutputInfo
     CalculateAndOutput > $resultDir/bigConfig.xml
 fi
 
-if [ "$numMediumBars" != 0 ]
+if [[ ! -z $numMediumBars && "$numMediumBars" != 0 ]]
 then
     SetParams "medium"
     OutputInfo
     CalculateAndOutput > $resultDir/mediumConfig.xml
 fi
-exit
+
+if [ -f $errorLog ]
+then
+    echo "There were errors/warnings written to the error log: $errorLog"
+fi
 
 rm -f ./fit.log
