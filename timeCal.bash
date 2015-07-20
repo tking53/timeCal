@@ -1,100 +1,175 @@
 #!/bin/bash
-hisPath="/home/pixie16/svp/students/pixie_scan/run4024-newTest.his"
-tofId=3133
-diffId=3132
-numBars=36
-let numDiff=$numBars-1
-let numTof=$numBars-1
-let tofLines=$numBars+1
-let diffLines=$numBars+1
+#-------------------------------------------------------------------------------
+# -- \file timeCal.bash
+# -- Description: This is a bash script that will extract the  ToF and Tdiff
+# --    spectra from an uncalibrated VANDLE histogram using readhis. It will
+# --    give as final output the xml code for the pixie_scan-v3 configuration
+# --    file. It expects as input the number of VANDLE bars you have in the
+# --    analysis.
+# --    
+# -- \author S. V. Paulauskas
+# -- \date 05 December 2012
+# --
+# -- This script is distributed as part of a suite to perform
+# -- calibrations for VANDLE. It is distributed under the
+# -- GPL V 3.0 license. 
+# ------------------------------------------------------------------------------
+source config.bash
 
-errorMsg() {
-    echo -e "We have some kind of problems fitting the " $1 "."
-    echo -e "You should check the fitting script and adjust initial parameters"
-}
+speedOfLight=29.9792458 #cm/ns
 
-successMsg() {
-    echo -e "FUCK YEAH!!!! We successfully completed the " $1 " fits."
-    echo -e "There were " $2 " fits (plus one header line)"
-}
+let maxStartCount=$numStarts-1
+let numSmallCount=$numSmallBars-1
+let numMediumCount=$numMediumBars-1
+let numBigCount=$numBigBars-1
 
-#--------- DOING THE TOF PART ----------------
-rm -f results-tof.dat test.par test.dat
-echo -e "#Num MaxPos Mu" > results-tof.dat
-for i in `seq 0 $numTof`
-do
-    readhis $hisPath --id $tofId --gy $i,$i > test.dat
-    hasData=`awk '{if(NR>4 && $2!=0){print 1; exit(1)} }' test.dat`
-    gnuplot timingCal.gp 2>&1>/dev/null && j=`cat test.par`
-    if (( hasData == 0 ))
+tempHistData="/tmp/tcal.dat"
+tempFitResults="/tmp/tcal.par"
+errorLog="errors.log"
+rm $errorLog > /dev/null 2>&1
+skippedCount=0
+
+SumSpectraCounts() {
+    sum=`awk '{if(NR>4){sum += $2}} END{print sum}' $tempHistData`
+    if [ $sum -ge $minStats ]
     then
-        echo $i 0.0 0.0 >> results-tof.dat
+        hasEnoughStats=true
     else
-        echo $i $j >> results-tof.dat
+        if [[ $fitType -eq "tof" ]]
+        then
+            skipped[skippedCount]="ToF : $type $num w/ Start $startNum"
+        elif [[ $fitType -eq "diff" ]]
+        then
+            skipped[skippedCount]="Diff : $type $num"
+        else
+            echo "We should never have an unknown fit type."
+        fi
+        let skipCount=skipCount+1
+        hasEnoughStats=false
     fi
-done
+}
 
-#--------- DOING THE DIFF PART ---------------
-rm -f test.par test.dat results-diff.dat
-echo -e "#Num MaxPos Mu" > results-diff.dat
-for i in `seq 0 $numDiff`
-do
-    #readhis $hisPath --id $diffId --gy $i,$i > test.dat
-    #hasDiffData=`awk '{if(NR>4 && $2!=0){print 1; exit(1)} }' test.dat`
-    #gnuplot timingCal.gp 2>&1>/dev/null && j=`cat test.par`
-    #if (( hasDiffData == 0 ))
-    #then
-        echo $i 0.0 >> results-diff.dat
-    #else
-    #    echo $i 0.0 >> results-tof.dat
-    #fi
-done
+ProjectSpectra() {
+    readhis $his --id $histId --gy $row,$row > $tempHistData
+    SumSpectraCounts
+}
 
-#---------- CHECK THE NUMBER OF TOF LINES -----------------------
-numFits=`awk '{nlines++} END {print nlines}' results-tof.dat`
-if (( $numFits != $tofLines ))
+PerformFit() {
+    ProjectSpectra
+    if [ "$hasEnoughStats" = true ]
+    then
+        gnuplot timeCal.gp > /dev/null 2>&1 && fitRes=`cat $tempFitResults`
+    else
+        fitRes=0
+    fi
+}
+
+CalcGammaTof() {
+    gammaTofNs=`echo "$dist/$speedOfLight" | bc -l`
+    gammaTofBins=`echo "$gammaTofNs*$histResolution+$histOffset" | bc -l`
+}
+
+SetParams(){
+    type=$1
+    if [ "$type" = small ]
+    then
+        dist=$smallDist
+        offset=$smallOffset
+        maxBarCount=$numSmallCount
+        numBars=$numSmallBars
+        physOffsets=$physOffsetDir/$smallOffsets
+    elif [ "$type" = medium ]
+    then
+        type=medium
+        dist=$mediumDist
+        offset=$mediumOffset
+        maxBarCount=$numMediumCount
+        numBars=$numMediumBars
+        physOffsets=$physOffsetDir/$mediumOffsets
+    elif [ "$type" = big ]
+    then
+        type=big
+        dist=$bigDist
+        offset=$bigOffset
+        maxBarCount=$numBigCount
+        numBars=$NumBigBars
+        physOffsets=$physOffsetDir/$bigOffsets
+    else
+        echo "ERROR: We have gotten an unknown bar type ($type)!! "\
+             "This should never happen! Now barfing...."
+        exit
+    fi
+}
+
+CalculateAndOutput(){
+    CalcGammaTof
+    echo -e "<$type>"
+    for j in `seq 0 $maxBarCount`
+    do
+        num=$j; row=$j
+        let histId=$vandleOffset+$vandleTdiffBaseId+$offset
+        fitType="diff"
+        PerformFit
+        if [ "$fitRes" != 0 ]
+        then
+            fitRes=`echo "scale=5;($histOffset-$fitRes)/$histResolution" | bc -l`
+        else
+            echo "Warning: Not enough stats for TDiff fit in $type bar $j "\
+                 >> $errorLog
+        fi
+
+        physInfo=`awk -v barnum=$j '{if($1==barnum) print "z0=\""$2"\" xoffset=\""$3"\" zoffset=\""$4"\""}' $physOffsets`
+        echo -e "    <Bar number=\"$j\" lroffset=\"$fitRes\" $physInfo>"
+        
+        let histId=vandleOffset+vandleTofBaseId+$offset
+        for i in `seq 0 $maxStartCount` 
+        do
+            startNum=$i
+            row=`echo "$j*$numStarts+$i" | bc`
+            fitType="tof"
+            PerformFit
+            if [ "$fitRes" != 0 ]
+            then
+                fitRes=`echo "scale=5;($gammaTofBins-$fitRes)/$histResolution" |bc -l`
+            else
+                echo "Warning: Not enough stats for ToF fit in $type bar $j "\
+                     "and start $i" >> $errorLog
+            fi
+            echo -e "        <TofOffset location=\"$i\" offset=\"$fitRes\"/>"
+        done
+        echo -e "    </Bar>"
+    done
+    echo -e "</$type>"
+}
+
+OutputInfo() {
+    echo "We are calculating the parameters for $numBars $type Bars."
+}
+
+if [[ ! -z $numSmallBars &&  "$numSmallBars" != 0 ]]
 then
-    errorMsg "TOF"
-else
-    successMsg "tof" $numFits
+    SetParams "small"
+    OutputInfo
+    CalculateAndOutput > $resultDir/smallConfig.xml
 fi
 
-#---------- CHECK THE NUMBER OF DIFF LINES ------------------------
-numFits=`awk '{nlines++} END {print nlines}' results-diff.dat`
-if (( $numFits != $diffLines ))
+if [[ ! -z $numBigBars && "$numBigBars" != 0 ]]
 then
-    errorMsg "DIFF"
-else
-    successMsg "diff" $numFits
+    SetParams "big"
+    OutputInfo
+    CalculateAndOutput > $resultDir/bigConfig.xml
 fi
 
-#---------------- CALCULATE THE NEW LINES FOR THE CORRECTION -------------
-awk '{if (NR > 1) print $1, (620-$3)*0.5}' results-tof.dat > results-tof.tmp
-awk '{if (NR > 1) print $1, 0.0}' results-diff.dat > results-diff.tmp
+if [[ ! -z $numMediumBars && "$numMediumBars" != 0 ]]
+then
+    SetParams "medium"
+    OutputInfo
+    CalculateAndOutput > $resultDir/mediumConfig.xml
+fi
 
-#----------- UPDATE THE TIMING CAL FILE -------------------
-while read LINE
-do
-    barNum=`echo $LINE | awk '{print $1}'`
-    cal0=`echo $LINE | awk '{print $2}'`
-    cal1=0.0
+if [ -f $errorLog ]
+then
+    echo "There were errors/warnings written to the error log: $errorLog"
+fi
 
-    newLine=`awk -v bar=$barNum -v tofCal0=$cal0 -v tofCal1=$cal1 '{if($1==bar && $2 =="big")print $1,$2,$3,$4,$5,$6, tofCal0, tofCal1}' timingCal.txt`
-    awk -v bar=$barNum -v line="$newLine" '{if($1==bar && $2 =="big") sub($0,line); print}' timingCal.txt > vandleCal.tmp
-    mv vandleCal.tmp timingCal.txt
-done < results-tof.tmp
-
-while read LINE
-do
-    set -- $LINE
-    barNum=$1
-    cal=$2
-    
-    newLine=`awk -v bar=$barNum -v diffCal0=$cal '{if($1==bar && $2 =="big")print $1,$2,$3,$4,$5,diffCal0,$7,$8}' timingCal.txt`
-    awk -v bar=$barNum -v line="$newLine" '{if($1==bar && $2 =="big") sub($0,line); print}' timingCal.txt > vandleCal.tmp
-    mv vandleCal.tmp timingCal.txt
-done < results-diff.tmp
-echo "Finished constructing the timingCal.txt."
-
-echo "Removing the temporary files"
-rm -f results-diff.tmp results-tof.tmp fit.log
+rm -f ./fit.log
