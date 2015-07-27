@@ -22,11 +22,11 @@
 
 #---------- Path and Histogram Information ----------
 #Sets the histogram to be used for the time calibration
-his="/home/pixie16/pixie_scan/3.his"
+his="/home/pixie16/svp/pixie_scan/test01.his"
 #Sets the path for the results
-resultDir="results"
+resultDir="results/is599_54k_01"
 #Sets the path for the physical offsets of the bars
-physOffsetDir="physOffsets/anl2015"
+physOffsetDir="phys/is600"
 
 #---------- Fitting Configuration ---------
 #Sets the minimum statistics required for fitting the spectra

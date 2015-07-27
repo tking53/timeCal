@@ -146,6 +146,12 @@ OutputInfo() {
     echo "We are calculating the parameters for $numBars $type Bars."
 }
 
+if [ ! -d $resultsDir ]
+then
+    echo "Creating the results directory."
+    mkdir -p $resultsDir
+fi
+
 if [[ ! -z $numSmallBars &&  "$numSmallBars" != 0 ]]
 then
     SetParams "small"
