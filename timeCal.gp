@@ -14,7 +14,7 @@
 # ---------------------------------------------------------------
 reset
 set fit errorvariables
-set terminal x11
+set terminal dumb
 file="/tmp/tcal.dat"
 
 plot file u 1:2
