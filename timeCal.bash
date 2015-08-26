@@ -146,10 +146,10 @@ OutputInfo() {
     echo "We are calculating the parameters for $numBars $type Bars."
 }
 
-if [ ! -d $resultsDir ]
+if [ ! -d $resultDir ]
 then
     echo "Creating the results directory."
-    mkdir -p $resultsDir
+    mkdir -p $resultDir
 fi
 
 if [[ ! -z $numSmallBars &&  "$numSmallBars" != 0 ]]
