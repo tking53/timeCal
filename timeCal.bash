@@ -172,4 +172,4 @@ then
     echo "There were errors/warnings written to the error log: $errorLog"
 fi
 
-rm -f ./fit.log
+rm -f ./fit.log /tmp/tcal.*
