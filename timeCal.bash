@@ -56,7 +56,7 @@ ProjectSpectra() {
 
 PerformFit() {
     ProjectSpectra
-    if [ "$hasEnoughStats" = "true" ]
+    if [ "$hasEnoughStats" = true ]
     then
         gnuplot timeCal.gp > /dev/null 2>&1 && fitRes=`cat $tempFitResults`
     else
@@ -152,23 +152,23 @@ then
     CalculateAndOutput > $resultDir/smallConfig.xml
 fi
 
-#if [[ ! -z $numBigBars && "$numBigBars" != 0 ]]
-#then
-#    SetParams "big"
-#    OutputInfo
-#    CalculateAndOutput > $resultDir/bigConfig.xml
-#fi
+if [[ ! -z $numBigBars && "$numBigBars" != 0 ]]
+then
+    SetParams "big"
+    OutputInfo
+    CalculateAndOutput > $resultDir/bigConfig.xml
+fi
 
-#if [[ ! -z $numMediumBars && "$numMediumBars" != 0 ]]
-#then
-#    SetParams "medium"
-#    OutputInfo
-#    CalculateAndOutput > $resultDir/mediumConfig.xml
-#fi
+if [[ ! -z $numMediumBars && "$numMediumBars" != 0 ]]
+then
+    SetParams "medium"
+    OutputInfo
+    CalculateAndOutput > $resultDir/mediumConfig.xml
+fi
 
 if [ -f $errorLog ]
 then
     echo "There were errors/warnings written to the error log: $errorLog"
 fi
 
-rm -f ./fit.log #/tmp/tcal.*
+rm -f ./fit.log /tmp/tcal.*
