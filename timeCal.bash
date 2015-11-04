@@ -56,7 +56,7 @@ ProjectSpectra() {
 
 PerformFit() {
     ProjectSpectra
-    if [ "$hasEnoughStats" = true ]
+    if [ "$hasEnoughStats" = "true" ]
     then
         gnuplot timeCal.gp > /dev/null 2>&1 && fitRes=`cat $tempFitResults`
     else
@@ -114,8 +114,7 @@ CalculateAndOutput(){
         then
             fitRes=`echo "scale=5;($histOffset-$fitRes)/$histResolution" | bc -l`
         else
-            echo "Warning: Not enough stats for TDiff fit in $type bar $j "\
-                 >> $errorLog
+            echo "Warning: Not enough stats for TDiff fit in $type bar $j " >> $errorLog
         fi
 
         physInfo=`awk -v barnum=$j '{if($1==barnum) print "z0=\""$2"\" xoffset=\""$3"\" zoffset=\""$4"\""}' $physOffsets`
@@ -153,23 +152,23 @@ then
     CalculateAndOutput > $resultDir/smallConfig.xml
 fi
 
-if [[ ! -z $numBigBars && "$numBigBars" != 0 ]]
-then
-    SetParams "big"
-    OutputInfo
-    CalculateAndOutput > $resultDir/bigConfig.xml
-fi
+#if [[ ! -z $numBigBars && "$numBigBars" != 0 ]]
+#then
+#    SetParams "big"
+#    OutputInfo
+#    CalculateAndOutput > $resultDir/bigConfig.xml
+#fi
 
-if [[ ! -z $numMediumBars && "$numMediumBars" != 0 ]]
-then
-    SetParams "medium"
-    OutputInfo
-    CalculateAndOutput > $resultDir/mediumConfig.xml
-fi
+#if [[ ! -z $numMediumBars && "$numMediumBars" != 0 ]]
+#then
+#    SetParams "medium"
+#    OutputInfo
+#    CalculateAndOutput > $resultDir/mediumConfig.xml
+#fi
 
 if [ -f $errorLog ]
 then
     echo "There were errors/warnings written to the error log: $errorLog"
 fi
 
-rm -f ./fit.log /tmp/tcal.*
+rm -f ./fit.log #/tmp/tcal.*
