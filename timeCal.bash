@@ -199,7 +199,7 @@ if [[ ! -z $numMediumBars && "$numMediumBars" != 0 ]]
 then
     SetParams "medium"
     OutputInfo
-    CalculateAndOutput #> $resultDir/mediumConfig.xml
+    CalculateAndOutput > $resultDir/mediumConfig.xml
 fi
 
 if [ -f $errorLog ]
