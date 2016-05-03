@@ -22,9 +22,9 @@
 
 #---------- Path and Histogram Information ----------
 #Sets the histogram to be used for the time calibration
-his=${HOME}/programs/sources/pixie_scan/is599_52k_02-cbar13.his
+his="his/test00.his"
 #Sets the path for the results
-resultDir="results/is599_52k_02"
+resultDir="res/is599/is599_52k_00"
 #Sets the path for the physical offsets of the bars
 physOffsetDir="phys/is600"
 
@@ -39,33 +39,22 @@ numStarts=1
 #---------- Small Bar Information -----------
 #The number of small VANDLE bars that are in the analysis
 numSmallBars=12
-#Average distance of the small VANDLE bars from the source 
-smallDist=50.5
 #The file containing the small offsets 
 smallOffsets="small.dat"
 
 #---------- Medium Bar Information ----------
 #The number of medium VANDLE bars that are in the analysis
 numMediumBars=26
-#Average distance of the medium VANDLE bars from the source 
-mediumDist=100.0
 #The file containing the small offsets 
 mediumOffsets="medium.dat"
 
 #---------- Big Bar Information ----------
 #The number of big VANDLE bars that are in the analysis
 #numBigBars=0
-#Average distance of the medium VANDLE bars from the source 
-bigDist=300.0
 #The file containing the small offsets 
 bigOffsets="big.dat"
 
 #---------- Histogram Information ----------
-#VANDLE Histogram Resolution (bins/ns)
-histResolution=2
-#VANDLE Histogram Offsets (bins)
-histOffset=1000
-
 #Offset for VANDLE histograms
 vandleOffset=3200
 #Base Offset for the Time Difference
@@ -78,5 +67,9 @@ smallOffset=0
 mediumOffset=40
 #The DAMM ID offset for big VANDLE bars
 bigOffset=20
+#VANDLE Histogram Resolution (bins/ns)
+histResolution=2
+#VANDLE Histogram Offsets (bins)
+histOffset=1000
 
 

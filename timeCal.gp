@@ -13,25 +13,26 @@
 # -- GPL V 3.0 license. 
 # ---------------------------------------------------------------
 reset
+set macro
 set fit errorvariables
 set terminal dumb
-file="/tmp/tcal.dat"
+file="./tmp/tcal.dat"
 
 plot file u 1:2
-max = GPVAL_DATA_Y_MAX
+max_y = GPVAL_DATA_Y_MAX
 
-plot file u ($2 == max ? $2 : 1/0):1
-max_pos_x = GPVAL_DATA_Y_MAX
+plot file u ($2 == max_y ? $2 : 1/0):1 
+max_pos = GPVAL_DATA_Y_MAX
 
-fitLow=max_pos_x-30
-fitHigh=max_pos_x+30
+fitLow=max_pos-30
+fitHigh=max_pos+30
 
 gaussian(x) = (amp/(sigma*sqrt(2*pi)))*exp(-(x-mu)**2/(2*sigma**2))
 sigma=2.7
-amp=max*sqrt(2*pi)*sigma
-mu=max_pos_x
+amp=sigma*max_y*sqrt(2*pi)
+mu=max_pos
 fit [fitLow:fitHigh] gaussian(x) file u 1:($2 > 0 ? $2 : 1/0):3 via amp,sigma,mu
 mu=mu+0.5
 
-set print "/tmp/tcal.par"
+set print "./tmp/tcal.par"
 print mu

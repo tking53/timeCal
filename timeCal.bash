@@ -14,20 +14,44 @@
 # -- calibrations for VANDLE. It is distributed under the
 # -- GPL V 3.0 license. 
 # ------------------------------------------------------------------------------
-source config.bash
 
 speedOfLight=29.9792458 #cm/ns
+tmpDir="./tmp"
+tempHistData="$tmpDir/tcal.dat"
+tempFitResults="$tmpDir/tcal.par"
+errorLog="errors.log"
+rm $errorLog > /dev/null 2>&1
+skippedCount=0
+
+source config.bash
+
+if [ ! -d "$tmpDir" ]
+then
+    mkdir -p $tmpDir
+fi
+
+if [ ! -d "$resultDir" ]
+then
+    echo -e "Result directory missing, creating..."
+    mkdir -p $resultDir
+fi
+
+if [ ! -d "$physOffsetDir" ]
+then
+    echo -e "Physical offsets directory missing, creating..."
+    mkdir -p $physOffsetDir
+fi
+
+if [ ! -f "$his" ]
+then
+    echo -e "We could not find the requested his file this is fatal!"
+    exit
+fi
 
 let maxStartCount=$numStarts-1
 let numSmallCount=$numSmallBars-1
 let numMediumCount=$numMediumBars-1
 let numBigCount=$numBigBars-1
-
-tempHistData="/tmp/tcal.dat"
-tempFitResults="/tmp/tcal.par"
-errorLog="errors.log"
-rm $errorLog > /dev/null 2>&1
-skippedCount=0
 
 SumSpectraCounts() {
     sum=`awk '{if(NR>4){sum += $2}} END{print sum}' $tempHistData`
@@ -51,6 +75,10 @@ SumSpectraCounts() {
 
 ProjectSpectra() {
     readhis $his --id $histId --gy $row,$row > $tempHistData
+    if [ ! -f $tempHistData ]
+    then
+	echo -e "Something went wrong with the projection for $hisId in $his"
+    fi
     SumSpectraCounts
 }
 
@@ -62,10 +90,30 @@ PerformFit() {
     else
         fitRes=0
     fi
+    
+    if [ -z $fitRes ] 
+    then
+	echo -e "Something went wrong with the fitting, there was no result. Fatal!"
+	exit
+    fi
+    
+    if [ "$fitRes" != 0 ]
+    then
+	if [ "$fitType" == "diff" ] 
+	then
+            fitRes=`echo "scale=5;($histOffset-$fitRes)/$histResolution" | bc -l`
+	fi
+	if [ "$fitType" == "tof" ]
+	then
+	    fitRes=`echo "scale=5;($gammaTofBins-$fitRes)/$histResolution" | bc -l`
+	fi
+    else
+        echo "Warning: Not enough stats for $fitType fit in $type bar $j " >> $errorLog
+    fi
 }
 
 CalcGammaTof() {
-    gammaTofNs=`echo "$dist/$speedOfLight" | bc -l`
+    gammaTofNs=`echo "$z0/$speedOfLight" | bc -l`
     gammaTofBins=`echo "$gammaTofNs*$histResolution+$histOffset" | bc -l`
 }
 
@@ -102,23 +150,18 @@ SetParams(){
 }
 
 CalculateAndOutput(){
-    CalcGammaTof
     echo -e "<$type>"
     for j in `seq 0 $maxBarCount`
     do
         num=$j; row=$j
         let histId=$vandleOffset+$vandleTdiffBaseId+$offset
         fitType="diff"
-        PerformFit
-        if [ "$fitRes" != 0 ]
-        then
-            fitRes=`echo "scale=5;($histOffset-$fitRes)/$histResolution" | bc -l`
-        else
-            echo "Warning: Not enough stats for TDiff fit in $type bar $j "\
-                 >> $errorLog
-        fi
+	PerformFit
 
-        physInfo=`awk -v barnum=$j '{if($1==barnum) print "z0=\""$2"\" xoffset=\""$3"\" zoffset=\""$4"\""}' $physOffsets`
+	z0=`awk -v barnum=$j '{if($1==barnum && NR!=1) print $2}' $physOffsets`
+	CalcGammaTof
+
+        physInfo=`awk -v barnum=$j '{if($1==barnum && NR!=1) print "z0=\""$2"\" xoffset=\""$3"\" zoffset=\""$4"\""}' $physOffsets`
         echo -e "    <Bar number=\"$j\" lroffset=\"$fitRes\" $physInfo>"
         
         let histId=vandleOffset+vandleTofBaseId+$offset
@@ -128,13 +171,6 @@ CalculateAndOutput(){
             row=`echo "$j*$numStarts+$i" | bc`
             fitType="tof"
             PerformFit
-            if [ "$fitRes" != 0 ]
-            then
-                fitRes=`echo "scale=5;($gammaTofBins-$fitRes)/$histResolution" |bc -l`
-            else
-                echo "Warning: Not enough stats for ToF fit in $type bar $j "\
-                     "and start $i" >> $errorLog
-            fi
             echo -e "        <TofOffset location=\"$i\" offset=\"$fitRes\"/>"
         done
         echo -e "    </Bar>"
@@ -178,4 +214,4 @@ then
     echo "There were errors/warnings written to the error log: $errorLog"
 fi
 
-rm -f ./fit.log
+rm -rf ./fit.log $tmpDir
