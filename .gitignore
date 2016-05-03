@@ -1,9 +1,9 @@
 #The list of files for git to ignore
 
 #Data files
-*.dat
 *.xml
 physOffsets
+his
 
 #Backup files from various editors
 *.save

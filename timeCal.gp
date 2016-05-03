@@ -16,7 +16,7 @@ reset
 set macro
 set fit errorvariables
 set terminal dumb
-file="/tmp/tcal.dat"
+file="./tmp/tcal.dat"
 
 plot file u 1:2
 max_y = GPVAL_DATA_Y_MAX
@@ -34,5 +34,5 @@ mu=max_pos
 fit [fitLow:fitHigh] gaussian(x) file u 1:($2 > 0 ? $2 : 1/0):3 via amp,sigma,mu
 mu=mu+0.5
 
-set print "/tmp/tcal.par"
+set print "./tmp/tcal.par"
 print mu

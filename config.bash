@@ -22,11 +22,11 @@
 
 #---------- Path and Histogram Information ----------
 #Sets the histogram to be used for the time calibration
-his="his/084ga-tcal.his"
+his="his/test00.his"
 #Sets the path for the results
-resultDir="results/vandleLeribss2012/084ga-001-003"
+resultDir="res/test"
 #Sets the path for the physical offsets of the bars
-physOffsetDir="phys/vandleLeribss2012"
+physOffsetDir="phys/test"
 
 #---------- Fitting Configuration ---------
 #Sets the minimum statistics required for fitting the spectra
@@ -34,11 +34,11 @@ minStats=100
 
 #---------- Start Information -----------
 #The number of start detectors that are in the analysis
-numStarts=2
+numStarts=1
 
 #---------- Small Bar Information -----------
 #The number of small VANDLE bars that are in the analysis
-numSmallBars=48
+numSmallBars=0
 #Average distance of the small VANDLE bars from the source 
 smallDist=50.5
 #The file containing the small offsets 
@@ -46,7 +46,7 @@ smallOffsets="small.dat"
 
 #---------- Medium Bar Information ----------
 #The number of medium VANDLE bars that are in the analysis
-#numMediumBars=28
+numMediumBars=26
 #Average distance of the medium VANDLE bars from the source 
 mediumDist=100.0
 #The file containing the small offsets 
