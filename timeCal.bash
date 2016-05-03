@@ -17,14 +17,15 @@
 source config.bash
 
 speedOfLight=29.9792458 #cm/ns
+rand=$RANDOM
 
 let maxStartCount=$numStarts-1
 let numSmallCount=$numSmallBars-1
 let numMediumCount=$numMediumBars-1
 let numBigCount=$numBigBars-1
 
-tempHistData="/tmp/tcal.dat"
-tempFitResults="/tmp/tcal.par"
+tempHistData="/tmp/$RANDOM-tcal.dat"
+tempFitResults="/tmp/$RANDOM-tcal.par"
 errorLog="errors.log"
 rm $errorLog > /dev/null 2>&1
 skippedCount=0
