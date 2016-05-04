@@ -25,6 +25,17 @@ skippedCount=0
 
 source config.bash
 
+if [ ! -z $1 ]
+then
+   his="$1" 
+   hisbase=`basename $his .his`
+
+   if [ ! -z $2 ]
+   then
+       resultDir=$2/$hisbase
+   fi
+fi
+
 if [ ! -d "$tmpDir" ]
 then
     mkdir -p $tmpDir
