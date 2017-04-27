@@ -22,11 +22,11 @@
 
 #---------- Path and Histogram Information ----------
 #Sets the histogram to be used for the time calibration
-his="his/test00.his"
+his="/home/is632/OFFLINE_SCAN/timecal"
 #Sets the path for the results
-resultDir="res/is599/is599_52k_00"
+resultDir="/home/is632/OFFLINE_SCAN/timecal"
 #Sets the path for the physical offsets of the bars
-physOffsetDir="phys/is600"
+physOffsetDir="phys/is632"
 
 #---------- Fitting Configuration ---------
 #Sets the minimum statistics required for fitting the spectra
@@ -38,7 +38,7 @@ numStarts=1
 
 #---------- Small Bar Information -----------
 #The number of small VANDLE bars that are in the analysis
-numSmallBars=12
+#numSmallBars=12
 #The file containing the small offsets 
 smallOffsets="small.dat"
 
