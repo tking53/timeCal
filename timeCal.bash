@@ -23,17 +23,18 @@ errorLog="errors.log"
 rm $errorLog > /dev/null 2>&1
 skippedCount=0
 
-source config.bash
+timecalInstallDir=${HOME}/programs/timeCal
+
+source $timecalInstallDir/config.bash
 
 if [ ! -z $1 ]
 then
-   his="$1" 
-   hisbase=`basename $his .his`
-
-   if [ ! -z $2 ]
-   then
-       resultDir=$2/$hisbase
-   fi
+    his="$1" 
+    hisbase=`basename $his .his`
+    if [ ! -z $2 ]
+    then
+	resultDir=$2/$hisbase
+    fi
 fi
 
 if [ ! -d "$tmpDir" ]
@@ -44,7 +45,7 @@ fi
 if [ ! -d "$resultDir" ]
 then
     echo -e "Result directory missing, creating..."
-    mkdir -p $resultDir
+2    mkdir -p $resultDir
 fi
 
 if [ ! -d "$physOffsetDir" ]
@@ -97,7 +98,7 @@ PerformFit() {
     ProjectSpectra
     if [ "$hasEnoughStats" = true ]
     then
-        gnuplot timeCal.gp > /dev/null 2>&1 && fitRes=`cat $tempFitResults`
+        gnuplot $timecalInstallDir/timeCal.gp > /dev/null 2>&1 && fitRes=`cat $tempFitResults`
     else
         fitRes=0
     fi
