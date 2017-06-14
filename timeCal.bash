@@ -45,7 +45,7 @@ fi
 if [ ! -d "$resultDir" ]
 then
     echo -e "Result directory missing, creating..."
-2    mkdir -p $resultDir
+    mkdir -p $resultDir
 fi
 
 if [ ! -d "$physOffsetDir" ]

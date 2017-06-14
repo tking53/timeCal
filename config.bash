@@ -22,11 +22,11 @@
 
 #---------- Path and Histogram Information ----------
 #Sets the histogram to be used for the time calibration
-his="<PATH/TO/HIS>"
+#---his="<PATH/TO/HIS>"
 #Sets the path for the results
-resultDir="<PATH/TO/RESULTDIR>"
+#---resultDir="<PATH/TO/RESULTDIR>"
 #Sets the path for the physical offsets of the bars
-physOffsetDir="<PATH/TO/TIMECALINSTALL>/phys/ornl2016"
+physOffsetDir="$timecalInstallDir/phys/ornl2016"
 #---------- Fitting Configuration ---------
 #Sets the minimum statistics required for fitting the spectra
 minStats=100
