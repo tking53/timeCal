@@ -4,7 +4,6 @@
 *.xml
 physOffsets
 his
-errors.log
 
 #Backup files from various editors
 *.save
