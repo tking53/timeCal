@@ -22,11 +22,12 @@
 
 #---------- Path and Histogram Information ----------
 #Sets the histogram to be used for the time calibration
-#---his="<PATH/TO/HIS>"
+his="/home/is632/OFFLINE_SCAN/timecal"
 #Sets the path for the results
-#---resultDir="<PATH/TO/RESULTDIR>"
+resultDir="/home/is632/OFFLINE_SCAN/timecal"
 #Sets the path for the physical offsets of the bars
-physOffsetDir="$timecalInstallDir/phys/ornl2016"
+physOffsetDir="phys/is632"
+
 #---------- Fitting Configuration ---------
 #Sets the minimum statistics required for fitting the spectra
 minStats=100
@@ -43,7 +44,7 @@ smallOffsets="small.dat"
 
 #---------- Medium Bar Information ----------
 #The number of medium VANDLE bars that are in the analysis
-numMediumBars=42
+numMediumBars=26
 #The file containing the small offsets 
 mediumOffsets="medium.dat"
 
@@ -55,7 +56,7 @@ bigOffsets="big.dat"
 
 #---------- Histogram Information ----------
 #Offset for VANDLE histograms
-vandleOffset=3300
+vandleOffset=3200
 #Base Offset for the Time Difference
 vandleTdiffBaseId=2
 #Base Offset for the Time of Flight
@@ -63,7 +64,7 @@ vandleTofBaseId=3
 #The DAMM ID offset for small VANDLE bars
 smallOffset=0
 #The DAMM ID offset for medium VANDLE bars
-mediumOffset=10
+mediumOffset=40
 #The DAMM ID offset for big VANDLE bars
 bigOffset=20
 #VANDLE Histogram Resolution (bins/ns)
